@@ -1,0 +1,28 @@
+<!-- create_account.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="login-container">
+        <h2>Login</h2>
+        <form id="loginForm" action="/login" method="POST">
+            <div class="input-group">
+                <label for="newUsername">Username:</label>
+                <input type="text" id="newUsername" name="newUsername" required>
+            </div>
+            <div class="input-group">
+                <label for="newPassword">Password:</label>
+                <input type="password" id="newPassword" name="newPassword" required>
+            </div>
+            <button type="submit">Login</button>
+        </form>
+            <a href="createAccount">Create Account</a>
+            <p>Forgot Password? <a href="forgotPassword"> Click here</a></p>
+    </div>
+</body>
+</html>

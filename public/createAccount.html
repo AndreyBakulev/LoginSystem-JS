@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="create-account-container">
+        <h2>Create Account</h2>
+        <form id="createAccount" action="/createAccount" method="POST">
+            <div class="input-group">
+                <label for="newName">Name:</label>
+                <input type="text" id="newName" name="newName" required>
+            </div>
+            <div class="input-group">
+                <label for="newEmail">Email:</label>
+                <input type="text" id="newEmail" name="newEmail" required>
+            </div>
+            <div class="input-group">
+                <label for="newUsername">Username:</label>
+                <input type="text" id="newUsername" name="newUsername" required>
+            </div>
+            <div class="input-group">
+                <label for="newPassword">Password:</label>
+                <input type="password" id="newPassword" name="newPassword" required>
+            </div>
+            <div class="input-group">
+                <label for="newPassword">Confirm Password:</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" required>
+            </div>
+            <div class="input-group">
+                <label for="newAccountType">Account Type:</label>
+                <input type="text" id="newAccountType" name="newAccountType" required>
+            </div>
+            <button type="submit">Create Account</button>
+        </form>
+            <a href="login">Log in</a>
+            <p id="password-criteria">Password Criteria:</p>
+            <p id="password-req1">Must Be 10 or More characters</p>
+            <p id="password-req2">Must have an Uppercase and Lowercase letters</p>
+            <p id="password-req3">Must have a digit</p>
+            <p id="password-req4">Must have a special character</p>
+            <p id="password-strength">Password Strength: </p>
+            <p id="passwords-match"></p>
+    </div>
+    <script src="frontend.js"></script>
+</body>
+</html>
+<!-- sends a POST to /create-account -->
