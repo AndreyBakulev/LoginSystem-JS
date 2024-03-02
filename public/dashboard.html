@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .sidebar {
+            background-color: #555;
+            color: #fff;
+            width: 250px;
+            height: 100vh;
+            float: left;
+            padding-top: 20px;
+        }
+
+        .sidebar ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .sidebar ul li {
+            padding: 10px;
+            border-bottom: 1px solid #888;
+            transition: background-color 0.3s;
+        }
+
+        .sidebar ul li:hover {
+            background-color: #444;
+        }
+
+        .content {
+            padding: 20px;
+            margin-left: 250px;
+        }
+
+        .content h2 {
+            margin-top: 0;
+        }
+
+        .content p {
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>Dashboard</h1>
+</div>
+
+<div class="sidebar">
+    <ul>
+        <li><a href="#">Home</a></li>
+        <li><a href="#">Profile</a></li>
+        <li><a href="#">Messages</a></li>
+        <li><a href="#">Settings</a></li>
+        <li><a href="#">Logout</a></li>
+    </ul>
+</div>
+
+<div class="content">
+    <h2>Welcome to Your Dashboard</h2>
+    <p>This is a sample dashboard layout. You can customize it further based on your needs.</p>
+</div>
+
+</body>
+</html>
