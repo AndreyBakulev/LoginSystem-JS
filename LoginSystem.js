@@ -124,9 +124,8 @@ app.post("/forgotPassword", (req, res) => {
       const token = crypto.randomBytes(20).toString('hex');
       passwordResetTokens.set(email, hash(token));
       (async () => {
-      const record = await xata.db.userDatabase.update("rec_xyz", {token: hash(token),});
+      const record = await xata.db.userDatabase.update(await checkIfExists(email,'email',true), {token: hash(token)});
       })();
-      console.log(passwordResetTokens);
       sendEmail(email, token);
       console.log("email sent!");
       return res.redirect("/login");
@@ -157,17 +156,21 @@ app.listen(PORT, () => {
 });
 
 //================================================================================================================================
-async function checkIfExists(subfield,column) {
+async function checkIfExists(subfield,column,returnString) {
   try {
-    const exists = await alreadyExists(subfield,column);
+    const exists = await alreadyExists(subfield,column,returnString);
     return exists;
   } catch (error) {
     console.error(error);
   }
 }
-async function alreadyExists(subfield,column) {
+async function alreadyExists(subfield,column,returnString) {
+  //method overloading with returnString (boolean) so I can get the actual value
   const record = await xata.db.userDatabase.filter(column, subfield).getMany();
-  console.log(record.getId());
+  if(returnString !== undefined) {
+    const string = JSON.parse(record)[0].id;
+    return string;
+  }
   return record.length > 0;
 }
 
@@ -211,7 +214,6 @@ function ValidatePassword(password) {
       hasSpecialChar = true;
     }
   }
-
   var isStrong =
     hasUpperCase &&
     hasLowerCase &&
@@ -261,16 +263,8 @@ function setNewPassword(email, newPassword) {
 }
 /*
 PROBLEMS{
-  jesus christ fix alreadyExists omg
-  since database.js is running and this isnt, that means the prob is somewhere else
-  I cant get the token after the user makes error with password: req.query.token is undefined (prob cus its a post and it cant hold info like that)
-  solution 1: just save the token and use it later (surely unsafe for cyber security)
-
-  passwordResetTokens is resetting each time I restart the server, meaning I cant get the email to change password (I assume its cus I cant send email cus im at home and this will fix itself)
 }
 ADDITIONS{
-  FIGURE OUT HOW TO DO SQL
-  make diff salt for each user (add it to userbase)
   add 'see password'
   figure out how to use css lol
 }
@@ -280,4 +274,6 @@ API: xau_j900wuvMBJsPseF5AwSkExu0gyuafq4U5
 PATH: /Users/macpro/.npm-global/bin/xata
 NOTES FOR XATA:
 Each 'record' is a row or a user which is the 'id' on xata website
+If there r issues with api, make env file and make XATA_API_KEY=api (nothing else in file not even semicolon)
+xata returns a JSON array so first convert it and then go thru array
 */
