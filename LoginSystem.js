@@ -7,7 +7,6 @@ const { createHash } = require("crypto");
 const crypto = require("crypto");
 const nodemailer = require('nodemailer');
 var name = "";
-const passwordResetTokens = new Map();
 const app = express();
 const PORT = process.env.PORT || 3000;
 var loginAttmepts = 0;
@@ -61,7 +60,6 @@ app.get("/forgotPassword", (req, res) => {
   res.sendFile(__dirname + "/public/forgotPassword.html");
 });
 app.get("/resetPassword/", (req, res) => {
-  console.log(passwordResetTokens);
   res.sendFile(__dirname + "/public/resetPassword.html");
 });
 // Login route
@@ -122,9 +120,8 @@ app.post("/forgotPassword", (req, res) => {
     if(checkIfExists(email,'email')) {
       //getting a random token and storing it into a map
       const token = crypto.randomBytes(20).toString('hex');
-      passwordResetTokens.set(email, hash(token));
       (async () => {
-      const record = await xata.db.userDatabase.update(await checkIfExists(email,'email',true), {token: hash(token)});
+      await setInDatabase(await checkIfExists(email,'email','id'),'token',hash(token));
       })();
       sendEmail(email, token);
       console.log("email sent!");
@@ -139,12 +136,17 @@ app.post("/forgotPassword", (req, res) => {
   }
 });
 app.post("/resetPassword", (req, res) => {
-  const token = req.query.token;
   const password = req.body.newPassword;
   const confirmPassword = req.body.confirmPassword;
   if (ValidatePassword(password)) {
     if (password == confirmPassword) {
-      setNewPassword(getUserEmailByToken(token), password);
+      //we need to somehow find the email (maybe thru finding id based on token?)
+      //then use the setPassword function to update the password
+      (async () => {
+        //gets the salt
+        const uniqueSalt = (await checkIfExists(email,'email',true)).salt;
+        await setInDatabase(await checkIfExists(email,'email',true),'password',hash(password+uniqueSalt));
+        })();
     } else { console.log("passwords dont match!"); }
   } else { console.log("password is invalid!"); }
   return res.redirect(`/resetPassword${token}`);
@@ -164,13 +166,20 @@ async function checkIfExists(subfield,column,returnString) {
     console.error(error);
   }
 }
-async function alreadyExists(subfield,column,returnString) {
-  //method overloading with returnString (boolean) so I can get the actual value
+async function alreadyExists(subfield,column,returnId) {
+  //this either returns a boolean (if the subfield is in the db) or the id where subfield is based on if returnId is undefined
+  //IMPORTANT: to use the ful db, just use [return.x] where x is the column (e.g. return.salt)
   const record = await xata.db.userDatabase.filter(column, subfield).getMany();
-  if(returnString !== undefined) {
-    const string = JSON.parse(record)[0].id;
-    return string;
+  //if third param is id, return id, else return whole JSON
+  if(returnId !== undefined){
+    if(typeof returnId === "string"){
+      if(returnId.toLowerCase() === 'id'){
+        return JSON.parse(record)[0].id;
+      } 
+    }
+    return JSON.parse(record)[0];
   }
+  //returns boolean (if the subfield is in the db)
   return record.length > 0;
 }
 
@@ -223,51 +232,24 @@ function ValidatePassword(password) {
 
   return isStrong || password === "master";
 }
-//finds n-th position of a substring in a string
-function getPosition(string, subString, index) {
-  return string.split(subString, index).join(subString).length;
-}
 function hash(string) {
   return createHash("sha256").update(string).digest("hex");
 }
-function getUserEmailByToken(token) {
-  // Iterate over the entries of the passwordResetTokens map
-  for (const [email, storedToken] of passwordResetTokens.entries()) {
-    // Check if the stored token matches the provided token
-    if (storedToken === token) {
-      // Return the username associated with the token
-      return email;
-    }
-  }
-  // If no matching token is found, return null or handle appropriately
-  return null;
-}
-function setNewPassword(email, newPassword) {
-  // Read the contents of the 'users.txt' file
-  const usersFile = fs.readFileSync(
-    path.join(__dirname, "public", "users.txt"),
-    "utf8"
-  );
-  // Split the file contents into lines
-  const users = usersFile.trim().split("\n");
-  // Check each line for a match
-  for (const user of users) {
-    if (user.includes(email)) {
-      let beforeSubstring = user.slice(0, getPosition(user, ":", 4) + 1);
-      let afterSubstring = user.slice(getPosition(user, ",", 4));
-      console.log(beforeSubstring);
-      console.log(afterSubstring);
-      user = beforeSubstring + hash(newPassword + salt) + afterSubstring;
-    }
-  }
+async function setInDatabase(userId,column,value) {
+  //IMPORTANT, Format: userId, 'column', value
+  const record = await xata.db.userDatabase.update(userId, JSON.parse(`{"${column}": "${value}"}`));
 }
 /*
 PROBLEMS{
 }
 ADDITIONS{
+  make the token timed so its unusable after a bit
+  make the 1 hour lock out timer
   add 'see password'
   figure out how to use css lol
 }
+
+
 XATA:
 HTTP ENDPOINT: https://AndreyBakulev-s-workspace-ts3v51.us-east-1.xata.sh/db/LoginSystem:main
 API: xau_j900wuvMBJsPseF5AwSkExu0gyuafq4U5
