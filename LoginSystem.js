@@ -261,6 +261,9 @@ async function setInDatabase(userId, column, value) {
   const record = await xata.db.userDatabase.update(userId, JSON.parse(`{"${column}": "${value}"}`));
 }
 /*
+
+DECIDE IF U WANNA USE A FRONTEND FRAMEWORK (svelte, angular, vue)
+to connect express and frontend, use an api like rest (i think)
 PROBLEMS{
 }
 QUESTIONS{
