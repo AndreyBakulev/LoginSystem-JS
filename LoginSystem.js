@@ -1,5 +1,6 @@
 require("dotenv").config();
 const express = require("express");
+const ejs = require("ejs");
 const bodyParser = require("body-parser");
 const session = require("express-session");
 const store = new session.MemoryStore();
@@ -16,6 +17,8 @@ var loginAttmepts = 0;
 //setting up xata
 const { getXataClient } = require("./xata");
 const xata = getXataClient();
+app.set('view engine','ejs');
+app.set("views", path.join(__dirname, "views"));
 (async () => {
   const page = await xata.db.userDatabase
     .select([
@@ -65,23 +68,23 @@ const requireAuth = (req, res, next) => {
   }
 }
 app.get("/login", (req, res) => {
-  res.sendFile(__dirname + "/public/login.html");
+  res.render("login");
 });
 app.get("/createAccount", (req, res) => {
-  res.sendFile(__dirname + "/public/createAccount.html");
+  res.render("createAccount");
 });
 app.get("/forgotPassword", (req, res) => {
-  res.sendFile(__dirname + "/public/forgotPassword.html");
+  res.render("forgotPassword");
 });
 app.get("/resetPassword/", (req, res) => {
-  res.sendFile(__dirname + "/public/resetPassword.html");
+  res.render("resetPassword");  
 });
-app.get("/dashboard/",requireAuth, (req, res) => {
-  res.sendFile(__dirname + "/public/dashboard.html");
-});  
+app.get("/", requireAuth, (req, res) => {
+  res.render("dashboard");
+});
 // Login route
 app.post("/login", async (req, res) => {
-  if (loginAttmepts < 3) { 
+  if (loginAttmepts < 3) {
     const { newUsername, newPassword } = req.body;
     const rememberMe = req.body.rememberMe === 'true'; // will be 'true' if checked, undefined if not
     // Check if the provided username and password are valid
@@ -90,7 +93,7 @@ app.post("/login", async (req, res) => {
       //saying they have successfully logged in
       const userId = (await checkIfExists(newUsername, 'username', 'id'));
       req.session.userId = userId;
-      return res.redirect("/dashboard");
+      return res.redirect("/");
     } else {
       res.send("Invalid username or password.");
       loginAttmepts++;
