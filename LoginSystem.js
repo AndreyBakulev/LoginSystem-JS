@@ -10,7 +10,7 @@ const fs = require("fs");
 const { createHash } = require("crypto");
 const crypto = require("crypto");
 const nodemailer = require('nodemailer');
-var remembered = false;
+var rememberMe = false;
 const app = express();
 const PORT = process.env.PORT || 3000;
 var loginAttmepts = 0;
@@ -99,7 +99,8 @@ app.get("/", requireAuth, async (req, res) => {
   }
   const loggedInUser = checkIfExists(req.session.userId, 'username', 'id');
   res.render("dashboard", { userArray: userArray, username: loggedInUser });
-  if(!remembered){
+  //if the user chose to not remember themselves
+  if(!rememberMe){
     req.session.destroy();
   }
 });
@@ -108,7 +109,7 @@ app.get("/", requireAuth, async (req, res) => {
 app.post("/login", async (req, res) => {
   if (loginAttmepts < 3) {
     const { newUsername, newPassword } = req.body;
-    const rememberMe = req.body.rememberMe === 'true'; // will be 'true' if checked, undefined if not
+     rememberMe = req.body.rememberMe === 'true'; // will be 'true' if checked, undefined if not
     // Check if the provided username and password are valid
     const uniqueSalt = (await checkIfExists(newUsername, 'username', 'salt'));
     if (await checkIfExists(newUsername, 'username') && await checkIfExists(hash(newPassword + uniqueSalt), 'password')) {
@@ -117,7 +118,6 @@ app.post("/login", async (req, res) => {
       //this just checks if the user wants to stay logged in
       req.session.userId = userId;
       res.redirect("/");
-      if (rememberMe) { remembered = true; }
     } else {
       res.send("Invalid username or password.");
       loginAttmepts++;
@@ -288,24 +288,18 @@ async function setInDatabase(userId, column, value) {
   const record = await xata.db.userDatabase.update(userId, JSON.parse(`{"${column}": "${value}"}`));
 }
 /*
-
-DECIDE ON FRONT END FRAMEWORK (ask but prob vue)
-to connect express and frontend, use an api like rest (i think)
 PROBLEMS{
 }
 QUESTIONS{
-Do I need to globally copy and paste bootstrap js and css into every html?
+how do I get my ejs variables into the boilerplate so its global?
 }
 }
 ADDITIONS{
-  make the token timed so its unusable after a bit
+  add routes (prob)
   make the 1 hour lock out timer
   add 'see password'
-  figure out how to use css lol
 }
 NOTES:{
-UPON LOGOUT: DESTROY SESSION (req.session.destroy())
-
 }
 NODEMON:
 nodemon is great figure out how to run scripts on mac
