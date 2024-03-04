@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const ejs = require("ejs");
+const engine = require("ejs-mate");
 const bodyParser = require("body-parser");
 const session = require("express-session");
 const store = new session.MemoryStore();
@@ -19,6 +20,7 @@ const { getXataClient } = require("./xata");
 const xata = getXataClient();
 app.set('view engine','ejs');
 app.set("views", path.join(__dirname, "views"));
+app.engine("ejs", engine);
 (async () => {
   const page = await xata.db.userDatabase
     .select([
@@ -79,8 +81,10 @@ app.get("/forgotPassword", (req, res) => {
 app.get("/resetPassword/", (req, res) => {
   res.render("resetPassword");  
 });
-app.get("/", requireAuth, (req, res) => {
-  res.render("dashboard");
+app.get("/", requireAuth, async (req, res) => { 
+  //get all user and put them into an array
+  const username  = await checkIfExists(req.session.userId, 'id', 'username');
+  res.render("dashboard", { username: [username]});    
 });
 // Login route
 app.post("/login", async (req, res) => {
