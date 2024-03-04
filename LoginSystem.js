@@ -262,13 +262,12 @@ async function setInDatabase(userId, column, value) {
 }
 /*
 
-DECIDE IF U WANNA USE A FRONTEND FRAMEWORK (svelte, angular, vue)
+DECIDE ON FRONT END FRAMEWORK (ask but prob vue)
 to connect express and frontend, use an api like rest (i think)
 PROBLEMS{
 }
 QUESTIONS{
 Do I need to globally copy and paste bootstrap js and css into every html?
-
 }
 }
 ADDITIONS{
