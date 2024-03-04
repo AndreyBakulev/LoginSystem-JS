@@ -78,14 +78,28 @@ app.get("/createAccount", (req, res) => {
 app.get("/forgotPassword", (req, res) => {
   res.render("forgotPassword");
 });
-app.get("/resetPassword/", (req, res) => {
+app.get("/resetPassword", (req, res) => {
   res.render("resetPassword");  
+});
+app.get("/userList", async(req, res) => {
+  let allUsers = JSON.parse(await xata.db.userDatabase.getMany());
+  let userArray = [];
+  for(i = 0; i < allUsers.length; i++) {
+  userArray.push(allUsers[i].username);
+  }
+  const loggedInUser = checkIfExists(req.session.userId, 'username', 'id');
+  res.render("userList", {userArray: userArray, username: loggedInUser});    
 });
 app.get("/", requireAuth, async (req, res) => { 
   //get all user and put them into an array
-  const username  = await checkIfExists(req.session.userId, 'id', 'username');
-  res.render("dashboard", { username: [username]});    
-});
+  let allUsers = JSON.parse(await xata.db.userDatabase.getMany());
+  let userArray = [];
+  for(i = 0; i < allUsers.length; i++) {
+  userArray.push(allUsers[i].username);
+  }
+  const loggedInUser = checkIfExists(req.session.userId, 'username', 'id');
+  res.render("dashboard", {userArray: userArray, username: loggedInUser});     
+}); 
 // Login route
 app.post("/login", async (req, res) => {
   if (loginAttmepts < 3) {
