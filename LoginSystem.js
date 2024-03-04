@@ -87,8 +87,7 @@ app.get("/userList", async (req, res) => {
   for (i = 0; i < allUsers.length; i++) {
     userArray.push(allUsers[i].username);
   }
-  const loggedInUser = checkIfExists(req.session.userId, 'username', 'id');
-  res.render("userList", { userArray: userArray, username: loggedInUser });
+  res.render("userList");
 });
 app.get("/", requireAuth, async (req, res) => {
   //get all user and put them into an array
@@ -104,7 +103,6 @@ app.get("/", requireAuth, async (req, res) => {
     req.session.destroy();
   }
 });
-
 // Login route
 app.post("/login", async (req, res) => {
   if (loginAttmepts < 3) {
@@ -291,7 +289,6 @@ async function setInDatabase(userId, column, value) {
 PROBLEMS{
 }
 QUESTIONS{
-how do I get my ejs variables into the boilerplate so its global?
 }
 }
 ADDITIONS{
