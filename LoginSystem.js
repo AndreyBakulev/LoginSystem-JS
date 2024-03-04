@@ -78,10 +78,10 @@ app.get("/resetPassword/", (req, res) => {
 });
 app.get("/dashboard/",requireAuth, (req, res) => {
   res.sendFile(__dirname + "/public/dashboard.html");
-});
+});  
 // Login route
 app.post("/login", async (req, res) => {
-  if (loginAttmepts < 3) {
+  if (loginAttmepts < 3) { 
     const { newUsername, newPassword } = req.body;
     const rememberMe = req.body.rememberMe === 'true'; // will be 'true' if checked, undefined if not
     // Check if the provided username and password are valid
@@ -262,6 +262,11 @@ async function setInDatabase(userId, column, value) {
 }
 /*
 PROBLEMS{
+}
+QUESTIONS{
+Do I need to globally copy and paste bootstrap js and css into every html?
+
+}
 }
 ADDITIONS{
   make the token timed so its unusable after a bit
