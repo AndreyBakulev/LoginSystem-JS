@@ -110,7 +110,10 @@ app.post("/login", async (req, res) => {
     if (await checkIfExists(newUsername, 'username') && await checkIfExists(hash(newPassword + uniqueSalt), 'password')) {
       //saying they have successfully logged in
       const userId = (await checkIfExists(newUsername, 'username', 'id'));
-      req.session.userId = userId;
+      if(rememberMe){ //this just checks if the user wants to stay logged in
+        req.session.userId = userId;
+      }
+      
       return res.redirect("/");
     } else {
       res.send("Invalid username or password.");
