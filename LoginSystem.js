@@ -10,7 +10,7 @@ const fs = require("fs");
 const { createHash } = require("crypto");
 const crypto = require("crypto");
 const nodemailer = require('nodemailer');
-var name = "";
+var remembered = false;
 const app = express();
 const PORT = process.env.PORT || 3000;
 var loginAttmepts = 0;
@@ -18,7 +18,7 @@ var loginAttmepts = 0;
 //setting up xata
 const { getXataClient } = require("./xata");
 const xata = getXataClient();
-app.set('view engine','ejs');
+app.set('view engine', 'ejs');
 app.set("views", path.join(__dirname, "views"));
 app.engine("ejs", engine);
 (async () => {
@@ -79,27 +79,31 @@ app.get("/forgotPassword", (req, res) => {
   res.render("forgotPassword");
 });
 app.get("/resetPassword", (req, res) => {
-  res.render("resetPassword");  
+  res.render("resetPassword");
 });
-app.get("/userList", async(req, res) => {
+app.get("/userList", async (req, res) => {
   let allUsers = JSON.parse(await xata.db.userDatabase.getMany());
   let userArray = [];
-  for(i = 0; i < allUsers.length; i++) {
-  userArray.push(allUsers[i].username);
+  for (i = 0; i < allUsers.length; i++) {
+    userArray.push(allUsers[i].username);
   }
   const loggedInUser = checkIfExists(req.session.userId, 'username', 'id');
-  res.render("userList", {userArray: userArray, username: loggedInUser});    
+  res.render("userList", { userArray: userArray, username: loggedInUser });
 });
-app.get("/", requireAuth, async (req, res) => { 
+app.get("/", requireAuth, async (req, res) => {
   //get all user and put them into an array
   let allUsers = JSON.parse(await xata.db.userDatabase.getMany());
   let userArray = [];
-  for(i = 0; i < allUsers.length; i++) {
-  userArray.push(allUsers[i].username);
+  for (i = 0; i < allUsers.length; i++) {
+    userArray.push(allUsers[i].username);
   }
   const loggedInUser = checkIfExists(req.session.userId, 'username', 'id');
-  res.render("dashboard", {userArray: userArray, username: loggedInUser});     
-}); 
+  res.render("dashboard", { userArray: userArray, username: loggedInUser });
+  if(!remembered){
+    req.session.destroy();
+  }
+});
+
 // Login route
 app.post("/login", async (req, res) => {
   if (loginAttmepts < 3) {
@@ -110,11 +114,10 @@ app.post("/login", async (req, res) => {
     if (await checkIfExists(newUsername, 'username') && await checkIfExists(hash(newPassword + uniqueSalt), 'password')) {
       //saying they have successfully logged in
       const userId = (await checkIfExists(newUsername, 'username', 'id'));
-      if(rememberMe){ //this just checks if the user wants to stay logged in
-        req.session.userId = userId;
-      }
-      
-      return res.redirect("/");
+      //this just checks if the user wants to stay logged in
+      req.session.userId = userId;
+      res.redirect("/");
+      if (rememberMe) { remembered = true; }
     } else {
       res.send("Invalid username or password.");
       loginAttmepts++;
