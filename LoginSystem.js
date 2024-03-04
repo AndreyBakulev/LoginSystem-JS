@@ -287,6 +287,7 @@ async function setInDatabase(userId, column, value) {
 }
 /*
 PROBLEMS{
+  password checking isnt working in createAccount
 }
 QUESTIONS{
 }
