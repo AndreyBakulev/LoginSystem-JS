@@ -1,7 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const ejs = require("ejs");
-const engine = require("ejs-mate");
+const engine = require("ejs-mate"); 
 const bodyParser = require("body-parser");
 const session = require("express-session");
 const store = new session.MemoryStore();
@@ -21,6 +21,8 @@ const xata = getXataClient();
 app.set('view engine', 'ejs');
 app.set("views", path.join(__dirname, "views"));
 app.engine("ejs", engine);
+//ejs middleware
+
 (async () => {
   const page = await xata.db.userDatabase
     .select([
@@ -57,6 +59,24 @@ app.use(session({
   },
   store,
 }));
+//middleware for global variables
+app.use(async (req, res, next) => {
+  // Set global variables here
+  let allUsers = JSON.parse(await xata.db.userDatabase.getMany());
+  let userArray = [];
+  for (i = 0; i < allUsers.length; i++) {
+    userArray.push(allUsers[i]);
+  }
+  const loggedInId = (await checkIfExists(req.session.userId, 'id', 'id'));
+  const loggedInUsername = (await checkIfExists(req.session.userId, 'id', 'username'));
+  res.locals.userArray = userArray;
+  if(req.session.userId) {
+  res.locals.loggedInId = loggedInId;
+  }
+  res.locals.loggedInUsername = loggedInUsername;
+  next();
+});
+
 // Set up body parser middleware
 app.use(bodyParser.urlencoded({ extended: true }));
 //setting up session
@@ -88,8 +108,7 @@ app.get("/userList", async (req, res) => {
   for (i = 0; i < allUsers.length; i++) {
     userArray.push(allUsers[i]);
   }
-  const loggedInId = (await checkIfExists(req.session.userId, 'id', 'id'));
-  res.render("userList", { userArray: userArray, loggedInId: loggedInId });
+  res.render("userList");
 });
 app.get("/", requireAuth, async (req, res) => {
   //get all user and put them into an array
@@ -99,7 +118,7 @@ app.get("/", requireAuth, async (req, res) => {
     userArray.push(allUsers[i]);
   }
   const loggedInId = (await checkIfExists(req.session.userId, 'id', 'id'));
-  res.render("dashboard", { userArray: userArray, loggedInId: loggedInId });
+  res.render("dashboard");
   //if the user chose to not remember themselves
   if (!rememberMe) {
     req.session.destroy();
@@ -120,7 +139,7 @@ app.post("/login", async (req, res) => {
       res.redirect("/");
     } else {
       // Redirect to the login page with a flag indicating login failure
-      res.render("login", { loginFailed: true });
+      res.render("login");
       loginAttmepts++;
     }
   } else {
@@ -199,6 +218,10 @@ app.post("/resetPassword", (req, res) => {
     } else { console.log("passwords dont match!"); }
   } else { console.log("password is invalid!"); }
   return res.redirect(`/resetPassword${token}`);
+});
+app.post("/promoteUser", (req, res) => {
+  const userId = req.body.userId;
+  console.log("getting in here" + req.body + "!");  
 });
 
 // Start the server
