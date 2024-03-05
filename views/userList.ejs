@@ -8,10 +8,10 @@
           aria-expanded="false" aria-controls="collapse<%= i %>">
           User: <%= userArray[i].username %>
           <% if (userArray[i].accountType === 'admin') { %>
-            <span class="badge rounded-pill text-bg-danger">Admin</span>
+            <span class="badge text-bg-danger">Admin</span>
           <% } %>
           <% if (userArray[i].id === username) { %>
-            <span class="badge rounded-pill text-bg-primary">You</span>
+            <span class="badge text-bg-primary">You</span>
           <% } %>
         </button>
       </h2>
