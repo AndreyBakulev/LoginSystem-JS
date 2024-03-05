@@ -314,7 +314,7 @@ xata returns a JSON array so first convert it and then go thru array
 
 ----------------------------------------------------------------------------------------------
 EJS STUFF:
-in user list, you and admin r working but look ass
 somehow find a way to get return the array number of userId
 accordions fucked
+figure out how to make them start closed and open one by one
 */

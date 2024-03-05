@@ -5,15 +5,15 @@
         <h2 class="accordion-header">
           <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne"
             aria-expanded="false" aria-controls="collapseOne">
-            User: <%= userArray[i].username %>
-          </button>
+            User: <%= userArray[i].username%>
           <% if (userArray[i].accountType === 'admin'){ %>
             <span class="badge rounded-pill text-bg-danger">Admin</span>
           <% }if (userArray[i].id === username){ %>
             <span class="badge rounded-pill text-bg-primary">You</span>
           <% } %>
+        </button>
         </h2>
-        <% } %>
+        
         <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
           <div class="accordion-body">
             <strong>This is the first item's accordion body.</strong> It is shown by default, until the collapse plugin
@@ -24,5 +24,5 @@
           </div>
         </div>
       </div>
-      
+      <% } %>
   </div>
