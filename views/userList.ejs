@@ -8,10 +8,9 @@
             User: <%= userArray[i].username %>
           </button>
           <% if (userArray[i].accountType === 'admin'){ %>
-            <% console.log('admin') %>
-          <span class="lozenge bg-green-50 text-green-500">Admin</span>
-          <% }else if (userArray[i].id === username){ %>
-          <span class="lozenge bg-purple-50 text-purple-500">You</span>
+            <span class="badge rounded-pill text-bg-danger">Admin</span>
+          <% }if (userArray[i].id === username){ %>
+            <span class="badge rounded-pill text-bg-primary">You</span>
           <% } %>
         </h2>
         <% } %>
