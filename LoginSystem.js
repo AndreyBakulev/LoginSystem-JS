@@ -89,7 +89,7 @@ app.get("/userList", async (req, res) => {
     userArray.push(allUsers[i]);
   }
   const loggedInId = (await checkIfExists(req.session.userId, 'id', 'id'));
-  res.render("userList", { userArray: userArray, username: loggedInId });
+  res.render("userList", { userArray: userArray, loggedInId: loggedInId });
 });
 app.get("/", requireAuth, async (req, res) => {
   //get all user and put them into an array
@@ -99,7 +99,7 @@ app.get("/", requireAuth, async (req, res) => {
     userArray.push(allUsers[i]);
   }
   const loggedInId = (await checkIfExists(req.session.userId, 'id', 'id'));
-  res.render("dashboard", { userArray: userArray, username: loggedInId });
+  res.render("dashboard", { userArray: userArray, loggedInId: loggedInId });
   //if the user chose to not remember themselves
   if (!rememberMe) {
     req.session.destroy();

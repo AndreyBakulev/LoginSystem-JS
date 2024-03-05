@@ -10,7 +10,7 @@
           <% if (userArray[i].accountType === 'admin') { %>
             <span class="badge text-bg-danger">Admin</span>
           <% } %>
-          <% if (userArray[i].id === username) { %>
+          <% if (userArray[i].id === loggedInId) { %>
             <span class="badge text-bg-primary">You</span>
           <% } %>
         </button>
