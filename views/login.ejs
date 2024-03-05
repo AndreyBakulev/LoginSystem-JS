@@ -26,5 +26,33 @@
             <a href="createAccount">Create Account</a>
             <p>Forgot Password? <a href="forgotPassword"> Click here</a></p>
     </div>
+    <!-- Bootstrap Modal -->
+    <div class="modal fade" id="loginFailureModal" tabindex="-1" aria-labelledby="loginFailureModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="loginFailureModalLabel">Login Failed</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            Invalid username or password. Please try again.
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+    if (loginFailed) {
+        console.log("Login Failed");
+      $(document).ready(function() {
+        $('#loginFailureModal').modal('show');
+      });
+     } 
+  </script>
 </body>
 </html>
+<!-- JavaScript to trigger the modal -->
+
+  

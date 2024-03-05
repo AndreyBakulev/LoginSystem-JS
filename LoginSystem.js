@@ -119,7 +119,8 @@ app.post("/login", async (req, res) => {
       req.session.userId = userId;
       res.redirect("/");
     } else {
-      res.send("Invalid username or password.");
+      // Redirect to the login page with a flag indicating login failure
+      res.render("login", { loginFailed: true });
       loginAttmepts++;
     }
   } else {
