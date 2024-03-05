@@ -1,29 +1,56 @@
 <% layout('layout/boilerplate') %>
-  <div class="accordion col-md-8 offset-md-2" id="accordionExample">
-    
-    <% for(i=0; i < userArray.length; i++) { %>
-      <div class="accordion-item mt-5">
-        <h2 class="accordion-header">
-          <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne"
-            aria-expanded="false" aria-controls="collapseOne">
-            User: <%= userArray[i].username%>
-          <% if (userArray[i].accountType === 'admin'){ %>
+<div class="accordion col-md-8 offset-md-2" id="accordionExample">
+
+  <% for(let i = 0; i < userArray.length; i++) { %>
+    <div class="accordion-item mt-5">
+      <h2 class="accordion-header">
+        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse<%= i %>"
+          aria-expanded="false" aria-controls="collapse<%= i %>">
+          User: <%= userArray[i].username %>
+          <% if (userArray[i].accountType === 'admin') { %>
             <span class="badge rounded-pill text-bg-danger">Admin</span>
-          <% }if (userArray[i].id === username){ %>
+          <% } %>
+          <% if (userArray[i].id === username) { %>
             <span class="badge rounded-pill text-bg-primary">You</span>
           <% } %>
         </button>
-        </h2>
-        
-        <div id="collapseOne<%= i%>" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
-          <div class="accordion-body">
-            <strong>This is the first item's accordion body.</strong> It is shown by default, until the collapse plugin
-            adds the appropriate classes that we use to style each element. These classes control the overall
-            appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom
-            CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the
-            <code>.accordion-body</code>, though the transition does limit overflow.
+      </h2>
+      <div id="collapse<%= i %>" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+        <div class="accordion-body">
+          <div>Ban user:</div>
+          <div class="d-flex justify-content-end">
+            <button class="btn btn-danger" onclick="banUser('<%= userArray[i].id %>')">Ban</button>
           </div>
+          <br> <!-- Or use this line break -->
+          <% if(userArray[i].accountType !== 'admin'){ %>
+          <div>Make user admin:</div>
+          <div class="d-flex justify-content-end">
+            <button class="btn btn-success" onclick="makeAdmin('<%= userArray[i].id %>')">Make Admin</button>
+          </div>
+          <% } %>
         </div>
       </div>
-      <% } %>
-  </div>
+    </div>
+  <% } %>
+</div>
+
+<script>
+  function handleAccordionClick(button) {
+    const accordionButtons = document.querySelectorAll('.accordion-button');
+    accordionButtons.forEach(btn => {
+      if (btn !== button) {
+        btn.classList.remove('collapsed');
+      }
+    });
+  }
+
+  function banUser(userId) {
+    // Implement logic to ban user with given userId
+    console.log("User banned with ID: " + userId);
+  }
+
+  function makeAdmin(userId) {
+    // Implement logic to make user with given userId an admin
+    console.log("User made admin with ID: " + userId);
+  }
+</script>

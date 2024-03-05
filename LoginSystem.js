@@ -295,7 +295,11 @@ QUESTIONS{
 }
 }
 ADDITIONS{
-  add routes (prob)
+  accordion{
+    make admin button if not admin
+    remove timeout
+    ban their ass
+  }
   make the 1 hour lock out timer
   add 'see password'
 }
