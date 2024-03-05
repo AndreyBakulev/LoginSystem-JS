@@ -1,7 +1,8 @@
 <% layout('layout/boilerplate') %>
-  <div class="accordion" id="accordionExample">
+  <div class="accordion col-md-8 offset-md-2" id="accordionExample">
+    
     <% for(i=0; i < userArray.length; i++) { %>
-      <div class="accordion-item">
+      <div class="accordion-item mt-5">
         <h2 class="accordion-header">
           <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne"
             aria-expanded="false" aria-controls="collapseOne">
@@ -14,7 +15,7 @@
         </button>
         </h2>
         
-        <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
+        <div id="collapseOne<%= i%>" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
           <div class="accordion-body">
             <strong>This is the first item's accordion body.</strong> It is shown by default, until the collapse plugin
             adds the appropriate classes that we use to style each element. These classes control the overall
