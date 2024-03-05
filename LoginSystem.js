@@ -82,24 +82,26 @@ app.get("/resetPassword", (req, res) => {
   res.render("resetPassword");
 });
 app.get("/userList", async (req, res) => {
+  //get all user and put them into an array
   let allUsers = JSON.parse(await xata.db.userDatabase.getMany());
   let userArray = [];
   for (i = 0; i < allUsers.length; i++) {
-    userArray.push(allUsers[i].username);
+    userArray.push(allUsers[i]);
   }
-  res.render("userList");
+  const loggedInId = (await checkIfExists(req.session.userId, 'id', 'id'));
+  res.render("userList", { userArray: userArray, username: loggedInId });
 });
 app.get("/", requireAuth, async (req, res) => {
   //get all user and put them into an array
   let allUsers = JSON.parse(await xata.db.userDatabase.getMany());
   let userArray = [];
   for (i = 0; i < allUsers.length; i++) {
-    userArray.push(allUsers[i].username);
+    userArray.push(allUsers[i]);
   }
-  const loggedInUser = checkIfExists(req.session.userId, 'username', 'id');
-  res.render("dashboard", { userArray: userArray, username: loggedInUser });
+  const loggedInId = (await checkIfExists(req.session.userId, 'id', 'id'));
+  res.render("dashboard", { userArray: userArray, username: loggedInId });
   //if the user chose to not remember themselves
-  if(!rememberMe){
+  if (!rememberMe) {
     req.session.destroy();
   }
 });
@@ -107,7 +109,7 @@ app.get("/", requireAuth, async (req, res) => {
 app.post("/login", async (req, res) => {
   if (loginAttmepts < 3) {
     const { newUsername, newPassword } = req.body;
-     rememberMe = req.body.rememberMe === 'true'; // will be 'true' if checked, undefined if not
+    rememberMe = req.body.rememberMe === 'true'; // will be 'true' if checked, undefined if not
     // Check if the provided username and password are valid
     const uniqueSalt = (await checkIfExists(newUsername, 'username', 'salt'));
     if (await checkIfExists(newUsername, 'username') && await checkIfExists(hash(newPassword + uniqueSalt), 'password')) {
@@ -309,4 +311,10 @@ NOTES FOR XATA:
 Each 'record' is a row or a user which is the 'id' on xata website
 If there r issues with api, make env file and make XATA_API_KEY=api (nothing else in file not even semicolon)
 xata returns a JSON array so first convert it and then go thru array
+
+----------------------------------------------------------------------------------------------
+EJS STUFF:
+in user list, you and admin r working but look ass
+somehow find a way to get return the array number of userId
+accordions fucked
 */
