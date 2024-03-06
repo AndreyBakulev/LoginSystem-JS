@@ -70,17 +70,19 @@ app.use(async (req, res, next) => {
   for (i = 0; i < allUsers.length; i++) {
     userArray.push(allUsers[i]);
   }
-  const loggedInId = await checkIfExists(req.session.userId, "id", "id");
-  const loggedInUsername = await checkIfExists(
+  //getting id and username
+  res.locals.loggedInId = await checkIfExists(req.session.userId, "id", "id");
+  res.locals.loggedInUsername = await checkIfExists(
     req.session.userId,
     "id",
     "username"
   );
+  res.locals.loggedInAccountType = await checkIfExists(
+    req.session.userId,
+    "id",
+    "accountType"
+  );
   res.locals.userArray = userArray;
-  if (req.session.userId) {
-    res.locals.loggedInId = loggedInId;
-  }
-  res.locals.loggedInUsername = loggedInUsername;
   next();
 });
 
