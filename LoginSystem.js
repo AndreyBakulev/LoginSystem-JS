@@ -138,19 +138,27 @@ app.post("/login", async (req, res) => {
   if (loginAttmepts < 3) {
     const { newUsername, newPassword } = req.body;
     rememberMe = req.body.rememberMe === "true"; // will be 'true' if checked, undefined if not
+
     // Check if the provided username and password are valid
     const uniqueSalt = await checkIfExists(newUsername, "username", "salt");
+    //if the username and pass exist in the userbase
     if (
       (await checkIfExists(newUsername, "username")) &&
       (await checkIfExists(hash(newPassword + uniqueSalt), "password"))
     ) {
-      //saying they have successfully logged in
-      const userId = await checkIfExists(newUsername, "username", "id");
-      //this just checks if the user wants to stay logged in
-      req.session.userId = userId;
-      res.redirect("/");
+      if ((await checkIfExists(newUsername, "username", "banned")) === 'false') {
+        //check if they are banned
+        //saying they have successfully logged in
+        const userId = await checkIfExists(newUsername, "username", "id");
+        //this just checks if the user wants to stay logged in
+        req.session.userId = userId;
+        res.redirect("/");
+      } else {
+        console.log("This user is banned!");
+      }
     } else {
       // Redirect to the login page with a flag indicating login failure
+      console.log("Invalid username or password!");
       res.render("login");
       loginAttmepts++;
     }
@@ -298,7 +306,10 @@ app.post("/unbanUser", (req, res) => {
   })();
   return res.redirect("userList");
 });
-
+app.post("/logOut", (req, res) => {
+  req.session.destroy();
+  return res.redirect("/login");
+});
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
@@ -393,22 +404,21 @@ async function setInDatabase(userId, column, value) {
 }
 /*
 PROBLEMS{
-  password checking isnt working in createAccount
 }
 QUESTIONS{
-}
+  how do I fix the problem with sessions and rememberme
 }
 ADDITIONS{
-  accordion{
-    make admin button if not admin
-    remove timeout
-    ban their ass
-  }
   make the 1 hour lock out timer
-  add 'see password'
+  admin: remove lockout 
+  make banned users not log in
+  add modals for everythign instead of console.logging
 }
 NOTES:{
 }
+
+
+
 NODEMON:
 nodemon is great figure out how to run scripts on mac
 XATA:
