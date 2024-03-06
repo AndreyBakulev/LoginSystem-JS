@@ -16,6 +16,7 @@ const tables = [
       { name: "salt", type: "string" },
       { name: "accountType", type: "string" },
       { name: "token", type: "string" },
+      { name: "banned", type: "string" },
     ],
   },
 ];

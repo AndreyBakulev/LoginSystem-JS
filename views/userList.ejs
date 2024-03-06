@@ -1,48 +1,80 @@
 <% layout('layout/boilerplate') %>
 <div class="accordion col-md-8 offset-md-2" id="accordionExample">
-
-  <% for(let i = 0; i < userArray.length; i++) { %>
-    <div class="accordion-item mt-5">
-      <h2 class="accordion-header">
-        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse<%= i %>"
-          aria-expanded="false" aria-controls="collapse<%= i %>">
-          User: <%= userArray[i].username %>
-          <% if (userArray[i].accountType === 'admin') { %>
-            <span class="badge text-bg-danger">Admin</span>
-          <% } %>
-          <% if (userArray[i].id === loggedInId) { %>
-            <span class="badge text-bg-primary">You</span>
-          <% } %>
-        </button>
-      </h2>
-      <div id="collapse<%= i %>" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
-        <div class="accordion-body">
-          <div>Ban user:</div>
-          <div class="d-flex justify-content-end">
-            <button class="btn btn-danger" onclick="banUser('<%= userArray[i].id %>')">Ban</button>
-          </div>
-          <br> <!-- Or use this line break -->
-          <% if(userArray[i].accountType !== 'admin'){ %>
-          <div>Make user admin:</div>
-          <div class="d-flex justify-content-end">
-            <form id="promoteUser" action="/promoteUser" method="POST">
-              <button class="btn btn-success">Make Admin</button>
-            <input name="userId" type="hidden" value="<% userArray[i] %>"">
-            </form>
-          </div>
-          <% } %>
+  <% for(let i=0; i < userArray.length; i++) { %>
+  <div class="accordion-item mt-5">
+    <h2 class="accordion-header">
+      <button
+        class="accordion-button"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#collapse<%= i %>"
+        aria-expanded="false"
+        aria-controls="collapse<%= i %>"
+      >
+        User: <%= userArray[i].username %> <% if
+        (userArray[i].accountType==='admin' ) { %>
+        <span class="badge text-bg-primary">Admin </span>
+        <% } %> <% if (userArray[i].id===loggedInId) { %>
+        <span class="badge text-bg-success">You</span>
+        <% } %> <% if (userArray[i].banned === 'true'){ %>
+          <span class="badge text-bg-danger">Banned</span>
+        <% } %>
+      </button>
+    </h2>
+    <div
+      id="collapse<%= i %>"
+      class="accordion-collapse collapse"
+      data-bs-parent="#accordionExample"
+    >
+      <div class="accordion-body">
+        <% if(userArray[i].banned === 'false'){ %>
+        <div>Ban user:</div>
+        <div class="d-flex justify-content-end">
+          <form id="banUser" action="/banUser" method="POST">
+            <button class="btn btn-danger">Ban User</button>
+            <input name="userId" type="hidden" value="<%= userArray[i].id %>" />
+          </form>
         </div>
+        <% } else { %>
+          <div>Unban user:</div>
+        <div class="d-flex justify-content-end">
+          <form id="banUser" action="/unbanUser" method="POST">
+            <button class="btn btn-danger">Unban</button>
+            <input name="userId" type="hidden" value="<%= userArray[i].id %>" />
+          </form>
+        </div>
+        <% } %>
+        <br />
+        <!-- Or use this line break -->
+        <% if(userArray[i].accountType !=='admin' ){ %>
+        <div>Make user admin:</div>
+        <div class="d-flex justify-content-end">
+          <form id="promoteUser" action="/promoteUser" method="POST">
+            <button class="btn btn-warning">Make Admin</button>
+            <input name="userId" type="hidden" value="<%=userArray[i].id %>" />
+          </form>
+        </div>
+        <% } else {%>
+        <div>Revoke Admin:</div>
+        <div class="d-flex justify-content-end">
+          <form id="promoteUser" action="/demoteUser" method="POST">
+            <button class="btn btn-warning">Revoke Admin</button>
+            <input name="userId" type="hidden" value="<%=userArray[i].id %>" />
+          </form>
+        </div>
+        <% } %>
       </div>
     </div>
+  </div>
   <% } %>
 </div>
 
 <script>
   function handleAccordionClick(button) {
-    const accordionButtons = document.querySelectorAll('.accordion-button');
-    accordionButtons.forEach(btn => {
+    const accordionButtons = document.querySelectorAll(".accordion-button");
+    accordionButtons.forEach((btn) => {
       if (btn !== button) {
-        btn.classList.remove('collapsed');
+        btn.classList.remove("collapsed");
       }
     });
   }

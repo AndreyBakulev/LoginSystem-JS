@@ -1,7 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const ejs = require("ejs");
-const engine = require("ejs-mate"); 
+const engine = require("ejs-mate");
 const bodyParser = require("body-parser");
 const session = require("express-session");
 const store = new session.MemoryStore();
@@ -9,7 +9,7 @@ const path = require("path");
 const fs = require("fs");
 const { createHash } = require("crypto");
 const crypto = require("crypto");
-const nodemailer = require('nodemailer');
+const nodemailer = require("nodemailer");
 var rememberMe = false;
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -18,7 +18,7 @@ var loginAttmepts = 0;
 //setting up xata
 const { getXataClient } = require("./xata");
 const xata = getXataClient();
-app.set('view engine', 'ejs');
+app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.engine("ejs", engine);
 //ejs middleware
@@ -33,6 +33,7 @@ app.engine("ejs", engine);
       "salt",
       "accountType",
       "token",
+      "banned",
     ])
     .getPaginated({
       pagination: {
@@ -41,7 +42,7 @@ app.engine("ejs", engine);
     });
 })();
 const transporter = nodemailer.createTransport({
-  host: 'mail.smtp2go.com',
+  host: "mail.smtp2go.com",
   port: 80,
   secure: false, // true for 465, false for other ports
   //auth: {
@@ -50,28 +51,34 @@ const transporter = nodemailer.createTransport({
   // pass: 'lwxI53l8A1YCSABo' // your password or app-specific password
   //}
 });
-app.use(session({
-  secret: "keyboard cat",
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    maxAge: 1000 * 60 * 30, // 30 min
-  },
-  store,
-}));
+app.use(
+  session({
+    secret: "keyboard cat",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      maxAge: 1000 * 60 * 30, // 30 min
+    },
+    store,
+  })
+);
 //middleware for global variables
 app.use(async (req, res, next) => {
-  // Set global variables here
+  // list of all users
   let allUsers = JSON.parse(await xata.db.userDatabase.getMany());
   let userArray = [];
   for (i = 0; i < allUsers.length; i++) {
     userArray.push(allUsers[i]);
   }
-  const loggedInId = (await checkIfExists(req.session.userId, 'id', 'id'));
-  const loggedInUsername = (await checkIfExists(req.session.userId, 'id', 'username'));
+  const loggedInId = await checkIfExists(req.session.userId, "id", "id");
+  const loggedInUsername = await checkIfExists(
+    req.session.userId,
+    "id",
+    "username"
+  );
   res.locals.userArray = userArray;
-  if(req.session.userId) {
-  res.locals.loggedInId = loggedInId;
+  if (req.session.userId) {
+    res.locals.loggedInId = loggedInId;
   }
   res.locals.loggedInUsername = loggedInUsername;
   next();
@@ -86,9 +93,9 @@ const requireAuth = (req, res, next) => {
   if (req.session.userId) {
     next(); // User is authenticated, continue to next middleware
   } else {
-    res.redirect('/login'); // User is not authenticated, redirect to login page
+    res.redirect("/login"); // User is not authenticated, redirect to login page
   }
-}
+};
 app.get("/login", (req, res) => {
   res.render("login");
 });
@@ -117,7 +124,7 @@ app.get("/", requireAuth, async (req, res) => {
   for (i = 0; i < allUsers.length; i++) {
     userArray.push(allUsers[i]);
   }
-  const loggedInId = (await checkIfExists(req.session.userId, 'id', 'id'));
+  const loggedInId = await checkIfExists(req.session.userId, "id", "id");
   res.render("dashboard");
   //if the user chose to not remember themselves
   if (!rememberMe) {
@@ -128,12 +135,15 @@ app.get("/", requireAuth, async (req, res) => {
 app.post("/login", async (req, res) => {
   if (loginAttmepts < 3) {
     const { newUsername, newPassword } = req.body;
-    rememberMe = req.body.rememberMe === 'true'; // will be 'true' if checked, undefined if not
+    rememberMe = req.body.rememberMe === "true"; // will be 'true' if checked, undefined if not
     // Check if the provided username and password are valid
-    const uniqueSalt = (await checkIfExists(newUsername, 'username', 'salt'));
-    if (await checkIfExists(newUsername, 'username') && await checkIfExists(hash(newPassword + uniqueSalt), 'password')) {
+    const uniqueSalt = await checkIfExists(newUsername, "username", "salt");
+    if (
+      (await checkIfExists(newUsername, "username")) &&
+      (await checkIfExists(hash(newPassword + uniqueSalt), "password"))
+    ) {
       //saying they have successfully logged in
-      const userId = (await checkIfExists(newUsername, 'username', 'id'));
+      const userId = await checkIfExists(newUsername, "username", "id");
       //this just checks if the user wants to stay logged in
       req.session.userId = userId;
       res.redirect("/");
@@ -151,15 +161,28 @@ app.post("/login", async (req, res) => {
 app.post("/createAccount", async (req, res) => {
   //IMPORTANT, HTML NAMES MATTER
   //do the password logic in here
-  const { newName, newEmail, newUsername, newPassword, confirmPassword, newAccountType } = req.body;
-  if (newUsername.trim() != "" || newEmail.trim() != "" || newPassword.trim() != "" || newName.trim() != "" || newAccountType.trim() != "") {
+  const {
+    newName,
+    newEmail,
+    newUsername,
+    newPassword,
+    confirmPassword,
+    newAccountType,
+  } = req.body;
+  if (
+    newUsername.trim() != "" ||
+    newEmail.trim() != "" ||
+    newPassword.trim() != "" ||
+    newName.trim() != "" ||
+    newAccountType.trim() != ""
+  ) {
     if (newEmail.includes("@") && newEmail.includes(".")) {
-      if (await checkIfExists(newUsername, 'username') == false) {
-        if (await checkIfExists(newEmail, 'email') == false) {
+      if ((await checkIfExists(newUsername, "username")) == false) {
+        if ((await checkIfExists(newEmail, "email")) == false) {
           if (ValidatePassword(newPassword)) {
             if (newPassword == confirmPassword) {
               if (newAccountType === "admin" || newAccountType === "user") {
-                const salt = crypto.randomBytes(16).toString('hex');
+                const salt = crypto.randomBytes(16).toString("hex");
                 //makes a new record in the db
                 (async () => {
                   const record = await xata.db.userDatabase.create({
@@ -173,23 +196,41 @@ app.post("/createAccount", async (req, res) => {
                 })();
                 console.log("Account created successfully!");
                 return res.redirect("/login");
-              } else { console.log("account type is invalid!"); }
-            } else { console.log("passwords dont match!"); }
-          } else { console.log("password is invalid!"); }
-        } else { console.log("account with same email already exists!"); }
-      } else { console.log("Username already Taken!"); }
-    } else { console.log("email is invalid!"); }
-  } else { console.log("field(s) are empty!"); }
+              } else {
+                console.log("account type is invalid!");
+              }
+            } else {
+              console.log("passwords dont match!");
+            }
+          } else {
+            console.log("password is invalid!");
+          }
+        } else {
+          console.log("account with same email already exists!");
+        }
+      } else {
+        console.log("Username already Taken!");
+      }
+    } else {
+      console.log("email is invalid!");
+    }
+  } else {
+    console.log("field(s) are empty!");
+  }
   return res.redirect("/createAccount");
 });
 app.post("/forgotPassword", (req, res) => {
   const email = req.body.email;
   if (email.includes("@") && email.includes(".")) {
-    if (checkIfExists(email, 'email')) {
+    if (checkIfExists(email, "email")) {
       //getting a random token and storing it into a map
-      const token = crypto.randomBytes(20).toString('hex');
+      const token = crypto.randomBytes(20).toString("hex");
       (async () => {
-        await setInDatabase(await checkIfExists(email, 'email', 'id'), 'token', hash(token));
+        await setInDatabase(
+          await checkIfExists(email, "email", "id"),
+          "token",
+          hash(token)
+        );
       })();
       sendEmail(email, token);
       console.log("email sent!");
@@ -212,16 +253,48 @@ app.post("/resetPassword", (req, res) => {
       //then use the setPassword function to update the password
       (async () => {
         //gets the salt
-        const uniqueSalt = (await checkIfExists(email, 'email', 'salt'));
-        await setInDatabase(await checkIfExists(email, 'email', true), 'password', hash(password + uniqueSalt));
+        const uniqueSalt = await checkIfExists(email, "email", "salt");
+        await setInDatabase(
+          await checkIfExists(email, "email", true),
+          "password",
+          hash(password + uniqueSalt)
+        );
       })();
-    } else { console.log("passwords dont match!"); }
-  } else { console.log("password is invalid!"); }
+    } else {
+      console.log("passwords dont match!");
+    }
+  } else {
+    console.log("password is invalid!");
+  }
   return res.redirect(`/resetPassword${token}`);
 });
 app.post("/promoteUser", (req, res) => {
   const userId = req.body.userId;
-  console.log("getting in here" + req.body + "!");  
+  (async () => {
+    await setInDatabase(userId, "accountType", "admin");
+  })();
+  return res.redirect("userList");
+});
+app.post("/demoteUser", (req, res) => {
+  const userId = req.body.userId;
+  (async () => {
+    await setInDatabase(userId, "accountType", "user");
+  })();
+  return res.redirect("userList");
+});
+app.post("/banUser", (req, res) => {
+  const userId = req.body.userId;
+  (async () => {
+    setInDatabase(userId, "banned", "true");
+  })();
+  return res.redirect("userList");
+});
+app.post("/unbanUser", (req, res) => {
+  const userId = req.body.userId;
+  (async () => {
+    setInDatabase(userId, "banned", "false");
+  })();
+  return res.redirect("userList");
 });
 
 // Start the server
@@ -244,7 +317,8 @@ async function alreadyExists(subfield, column, returnId) {
   const record = await xata.db.userDatabase.filter(column, subfield).getMany();
   //if third param is id, return id, else return whole JSON
   if (returnId !== undefined) {
-    if (record.length > 0) { //if the record is in db
+    if (record.length > 0) {
+      //if the record is in db
       if (typeof returnId === "string") {
         return JSON.parse(record)[0][returnId];
       }
@@ -258,21 +332,22 @@ async function alreadyExists(subfield, column, returnId) {
 function sendEmail(email, token) {
   const resetLink = `http://localhost:3000/resetPassword?token=${token}`;
   const mailOptions = {
-    from: 'loginsystemtestnoreply@gmail.com',
+    from: "loginsystemtestnoreply@gmail.com",
     to: email,
-    subject: 'Password Reset Request',
-    text: `You are receiving this email because you (or someone else) have requested the reset of the password for your account.\n\n`
-      + `Please click on the following link, or paste this into your browser to complete the process:\n\n`
-      + `${resetLink}\n\n`
-      + `If you did not request this, please ignore this email and your password will remain unchanged.\n`
+    subject: "Password Reset Request",
+    text:
+      `You are receiving this email because you (or someone else) have requested the reset of the password for your account.\n\n` +
+      `Please click on the following link, or paste this into your browser to complete the process:\n\n` +
+      `${resetLink}\n\n` +
+      `If you did not request this, please ignore this email and your password will remain unchanged.\n`,
   };
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
       console.log(error);
-      return res.status(500).send('Error sending email');
+      return res.status(500).send("Error sending email");
     }
-    console.log('Email sent: ' + info.response);
-    res.send('Check your email for a password reset link');
+    console.log("Email sent: " + info.response);
+    res.send("Check your email for a password reset link");
   });
 }
 function ValidatePassword(password) {
@@ -309,7 +384,10 @@ function hash(string) {
 }
 async function setInDatabase(userId, column, value) {
   //IMPORTANT, Format: userId, 'column', value
-  const record = await xata.db.userDatabase.update(userId, JSON.parse(`{"${column}": "${value}"}`));
+  const record = await xata.db.userDatabase.update(
+    userId,
+    JSON.parse(`{"${column}": "${value}"}`)
+  );
 }
 /*
 PROBLEMS{
