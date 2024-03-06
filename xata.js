@@ -17,6 +17,7 @@ const tables = [
       { name: "accountType", type: "string" },
       { name: "token", type: "string" },
       { name: "banned", type: "string" },
+      { name: "timeout", type: "float" },
     ],
   },
 ];

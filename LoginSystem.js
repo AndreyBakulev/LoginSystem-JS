@@ -21,6 +21,8 @@ const xata = getXataClient();
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.engine("ejs", engine);
+const d = new Date();
+let time = d.getTime();
 //ejs middleware
 
 (async () => {
@@ -34,6 +36,7 @@ app.engine("ejs", engine);
       "accountType",
       "token",
       "banned",
+      "timeout",
     ])
     .getPaginated({
       pagination: {
@@ -135,8 +138,8 @@ app.get("/", requireAuth, async (req, res) => {
 });
 // Login route
 app.post("/login", async (req, res) => {
+  const { newUsername, newPassword } = req.body;
   if (loginAttmepts < 3) {
-    const { newUsername, newPassword } = req.body;
     rememberMe = req.body.rememberMe === "true"; // will be 'true' if checked, undefined if not
 
     // Check if the provided username and password are valid
@@ -146,7 +149,9 @@ app.post("/login", async (req, res) => {
       (await checkIfExists(newUsername, "username")) &&
       (await checkIfExists(hash(newPassword + uniqueSalt), "password"))
     ) {
-      if ((await checkIfExists(newUsername, "username", "banned")) === 'false') {
+      if (
+        (await checkIfExists(newUsername, "username", "banned")) === "false"
+      ) {
         //check if they are banned
         //saying they have successfully logged in
         const userId = await checkIfExists(newUsername, "username", "id");
@@ -163,8 +168,10 @@ app.post("/login", async (req, res) => {
       loginAttmepts++;
     }
   } else {
+    const idOfUsername = await checkIfExists(newUsername, "username", "id");
+    setInDatabase(idOfUsername, "timeout", d.getTime() + 1000 * 60 * 60);
     res.send("Too many login attempts. Please try again in an hour.");
-    //1 hour time out
+    //sets the unbanned time
   }
 });
 
@@ -409,10 +416,9 @@ QUESTIONS{
   how do I fix the problem with sessions and rememberme
 }
 ADDITIONS{
+  make a showModal(string) method that shows modal of string
   make the 1 hour lock out timer
   admin: remove lockout 
-  make banned users not log in
-  add modals for everythign instead of console.logging
 }
 NOTES:{
 }
