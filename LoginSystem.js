@@ -129,7 +129,6 @@ app.get("/", requireAuth, async (req, res) => {
   for (i = 0; i < allUsers.length; i++) {
     userArray.push(allUsers[i]);
   }
-  const loggedInId = await checkIfExists(req.session.userId, "id", "id");
   res.render("dashboard");
   //if the user chose to not remember themselves
   if (!rememberMe) {
@@ -139,13 +138,12 @@ app.get("/", requireAuth, async (req, res) => {
 // Login route
 app.post("/login", async (req, res) => {
   const { newUsername, newPassword } = req.body;
-  console.log(await checkIfExists(newUsername, "username", "timeout"));
   if (
-    await checkIfExists(newUsername, "username", "timeout") < d.getTime() ||
-    await checkIfExists(newUsername, "username", "timeout") === 0.0
+    (await checkIfExists(newUsername, "username", "timeout")) < d.getTime() ||
+    (await checkIfExists(newUsername, "username", "timeout")) === 0
   ) {
     //set timer back to 0
-    setInDatabase(newUsername, "timeout", 0);
+    setInDatabase(newUsername, "timeout", "0");
     if (loginAttmepts < 3) {
       rememberMe = req.body.rememberMe === "true"; // will be 'true' if checked, undefined if not
       // Check if the provided username and password are valid
@@ -166,12 +164,13 @@ app.post("/login", async (req, res) => {
           res.redirect("/");
         } else {
           console.log("This user is banned!");
+          res.render("login");
         }
       } else {
         // Redirect to the login page with a flag indicating login failure
         console.log("Invalid username or password!");
-        res.render("login");
         loginAttmepts++;
+        res.render("login");
       }
     } else {
       const idOfUsername = await checkIfExists(newUsername, "username", "id");
@@ -179,9 +178,12 @@ app.post("/login", async (req, res) => {
       res.send("Too many login attempts. Please try again in an hour.");
     }
   } else {
-    const timeLeft = (await checkIfExists(newUsername, "username", "timeout") - d.getTime())/60000;
+    const timeLeft =
+      ((await checkIfExists(newUsername, "username", "timeout")) -
+        d.getTime()) /
+      60000;
     console.log("you have been timed out for too many login attempts!");
-    console.log("you have "+timeLeft +" minutes left");
+    console.log("you have " + timeLeft + " minutes left");
   }
 });
 
@@ -312,20 +314,27 @@ app.post("/demoteUser", (req, res) => {
 app.post("/banUser", (req, res) => {
   const userId = req.body.userId;
   (async () => {
-    setInDatabase(userId, "banned", "true");
+    await setInDatabase(userId, "banned", "true");
   })();
   return res.redirect("userList");
 });
 app.post("/unbanUser", (req, res) => {
   const userId = req.body.userId;
   (async () => {
-    setInDatabase(userId, "banned", "false");
+    await setInDatabase(userId, "banned", "false");
   })();
   return res.redirect("userList");
 });
 app.post("/logOut", (req, res) => {
   req.session.destroy();
   return res.redirect("/login");
+});
+app.post("/removeTimeout", (req, res) => {
+  const userId = req.body.userId;
+  (async () => {
+    await setInDatabase(userId, "timeout", "0");
+  })();
+  return res.redirect("userList");
 });
 // Start the server
 app.listen(PORT, () => {

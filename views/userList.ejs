@@ -63,6 +63,15 @@
           </form>
         </div>
         <% } %>
+        <% if(userArray[i].timeout !=='0'){ %>
+          <div>Remove User timeout</div>
+          <div class="d-flex justify-content-end">
+            <form id="promoteUser" action="/removeTimeout" method="POST">
+              <button class="btn btn-primary">Remove timeout</button>
+              <input name="userId" type="hidden" value="<%=userArray[i].id %>" />
+            </form>
+          </div>
+          <% } %>
       </div>
     </div>
   </div>
