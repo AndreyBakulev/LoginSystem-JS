@@ -37,6 +37,7 @@ let time = d.getTime();
       "token",
       "banned",
       "timeout",
+      "timeLoggedIn",
     ])
     .getPaginated({
       pagination: {
@@ -60,7 +61,7 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      maxAge: 1000 * 60 * 30, // 30 min
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
     },
     store,
   })
@@ -86,6 +87,11 @@ app.use(async (req, res, next) => {
     "accountType"
   );
   res.locals.userArray = userArray;
+  res.locals.loggedInTime = await checkIfExists(
+    req.session.userId,
+    "id",
+    "timeLoggedIn"
+  );
   next();
 });
 
@@ -115,25 +121,14 @@ app.get("/resetPassword", (req, res) => {
 });
 app.get("/userList", async (req, res) => {
   //get all user and put them into an array
-  let allUsers = JSON.parse(await xata.db.userDatabase.getMany());
-  let userArray = [];
-  for (i = 0; i < allUsers.length; i++) {
-    userArray.push(allUsers[i]);
-  }
   res.render("userList");
 });
 app.get("/", requireAuth, async (req, res) => {
-  //get all user and put them into an array
-  let allUsers = JSON.parse(await xata.db.userDatabase.getMany());
-  let userArray = [];
-  for (i = 0; i < allUsers.length; i++) {
-    userArray.push(allUsers[i]);
+  if (!rememberMe) {
+    req.session.cookie.maxAge = 1000 * 60 * 5;
   }
   res.render("dashboard");
   //if the user chose to not remember themselves
-  if (!rememberMe) {
-    req.session.destroy();
-  }
 });
 // Login route
 app.post("/login", async (req, res) => {
@@ -161,6 +156,8 @@ app.post("/login", async (req, res) => {
           const userId = await checkIfExists(newUsername, "username", "id");
           //this just checks if the user wants to stay logged in
           req.session.userId = userId;
+          //adds the time logged in
+          setInDatabase(userId, "timeLoggedIn", d.getTime());
           res.redirect("/");
         } else {
           console.log("This user is banned!");
@@ -175,6 +172,7 @@ app.post("/login", async (req, res) => {
     } else {
       const idOfUsername = await checkIfExists(newUsername, "username", "id");
       setInDatabase(idOfUsername, "timeout", d.getTime() + 1000 * 60 * 60);
+      loginAttmepts = 0;
       res.send("Too many login attempts. Please try again in an hour.");
     }
   } else {
@@ -435,9 +433,9 @@ QUESTIONS{
   how do I fix the problem with sessions and rememberme
 }
 ADDITIONS{
+  window.alert(string)
+  rememberMe + logintime (store in db)
   make a showModal(string) method that shows modal of string
-  make the 1 hour lock out timer
-  admin: remove lockout 
 }
 NOTES:{
 }

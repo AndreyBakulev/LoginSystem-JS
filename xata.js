@@ -18,6 +18,7 @@ const tables = [
       { name: "token", type: "string" },
       { name: "banned", type: "string" },
       { name: "timeout", type: "string" },
+      { name: "timeLoggedIn", type: "string" },
     ],
   },
 ];

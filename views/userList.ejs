@@ -17,8 +17,10 @@
         <% } %> <% if (userArray[i].id===loggedInId) { %>
         <span class="badge text-bg-success">You</span>
         <% } %> <% if (userArray[i].banned === 'true'){ %>
-          <span class="badge text-bg-danger">Banned</span>
-        <% } %>
+        <span class="badge text-bg-danger">Banned</span>
+        <% } %> <% if (userArray[i].timeout > 0){ %>
+          <span class="badge text-bg-warning">Timed Out</span>
+          <% } %>
       </button>
     </h2>
     <div
@@ -36,7 +38,7 @@
           </form>
         </div>
         <% } else { %>
-          <div>Unban user:</div>
+        <div>Unban user:</div>
         <div class="d-flex justify-content-end">
           <form id="banUser" action="/unbanUser" method="POST">
             <button class="btn btn-danger">Unban</button>
