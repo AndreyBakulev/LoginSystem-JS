@@ -12,8 +12,9 @@ const crypto = require("crypto");
 const nodemailer = require("nodemailer");
 var rememberMe = false;
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 var loginAttmepts = 0;
+// var flash = require("connect-flash");
 //this is for email sending
 //setting up xata
 const { getXataClient } = require("./xata");
@@ -66,6 +67,7 @@ app.use(
     store,
   })
 );
+// app.use(flash());
 //middleware for global variables
 app.use(async (req, res, next) => {
   // list of all users
@@ -127,6 +129,7 @@ app.get("/", requireAuth, async (req, res) => {
   if (!rememberMe) {
     req.session.cookie.maxAge = 1000 * 60 * 5;
   }
+  req.flash("test", "working");
   res.render("dashboard");
   //if the user chose to not remember themselves
 });
@@ -428,6 +431,9 @@ async function setInDatabase(userId, column, value) {
 }
 /*
 PROBLEMS{
+  ADDING TOASTS:
+  res.render("login", { error: "Invalid username or password" });
+  throw ^ instead of console.log then check if error is present
 }
 QUESTIONS{
   how do I fix the problem with sessions and rememberme
