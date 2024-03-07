@@ -12,7 +12,7 @@ const crypto = require("crypto");
 const nodemailer = require("nodemailer");
 var rememberMe = false;
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 var loginAttmepts = 0;
 // var flash = require("connect-flash");
 //this is for email sending
