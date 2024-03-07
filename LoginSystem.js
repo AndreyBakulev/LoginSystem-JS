@@ -14,7 +14,6 @@ var rememberMe = false;
 const app = express();
 const PORT = process.env.PORT || 3000;
 var loginAttmepts = 0;
-// var flash = require("connect-flash");
 //this is for email sending
 //setting up xata
 const { getXataClient } = require("./xata");
@@ -67,7 +66,6 @@ app.use(
     store,
   })
 );
-// app.use(flash());
 //middleware for global variables
 app.use(async (req, res, next) => {
   // list of all users
@@ -99,7 +97,6 @@ app.use(async (req, res, next) => {
 
 // Set up body parser middleware
 app.use(bodyParser.urlencoded({ extended: true }));
-//setting up session
 app.use(express.static(path.join(__dirname, "public")));
 //middleware for sessions
 const requireAuth = (req, res, next) => {
@@ -129,13 +126,13 @@ app.get("/", requireAuth, async (req, res) => {
   if (!rememberMe) {
     req.session.cookie.maxAge = 1000 * 60 * 5;
   }
-  req.flash("test", "working");
   res.render("dashboard");
   //if the user chose to not remember themselves
 });
 // Login route
 app.post("/login", async (req, res) => {
   const { newUsername, newPassword } = req.body;
+  res.locals.error = "hi this is working";
   if (
     (await checkIfExists(newUsername, "username", "timeout")) < d.getTime() ||
     (await checkIfExists(newUsername, "username", "timeout")) === 0
@@ -227,7 +224,7 @@ app.post("/createAccount", async (req, res) => {
                 console.log("Account created successfully!");
                 return res.redirect("/login");
               } else {
-                console.log("account type is invalid!");
+                res.locals.error = "Invalid Account type";
               }
             } else {
               console.log("passwords dont match!");
